@@ -81,14 +81,13 @@ async function findAssignedTasks(client, project, day) {
     return client
         .search
         .search({jql: jql})
-        .then(result => {
-            return result.issues.map(task => {
+        .then(result => result.issues.map(task => {
                 return {
                     key: task.key,
                     name: task.fields.summary
                 };
-            });
-        })
+            })
+        )
         .catch(jiraErrorDump)
 }
 
@@ -106,12 +105,12 @@ async function findWorklogs(client, project, day) {
             return res.issues.map(task => {
                 const spentSeconds = task.fields.worklog
                     .worklogs
-                    .filter(worklog => {
-                        return worklog.author.key === userKey;
-                    })
-                    .reduce((sum, worklog) => {
-                        return sum + worklog.timeSpentSeconds;
-                    }, 0);
+                    .filter(worklog => 
+                        worklog.author.key === userKey
+                        && new Date(worklog.started) >= new Date(dayStart(day))
+                        && new Date(worklog.started) <= new Date(dayEnd(day))
+                    )
+                    .reduce((sum, worklog) => sum + worklog.timeSpentSeconds, 0);
                 return {
                     key: task.key,
                     hours: Math.floor(spentSeconds / 3600)

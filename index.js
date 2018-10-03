@@ -58,9 +58,7 @@ inquirer
         ]);
     })
     .then(([tasks, worklogs]) => {
-        let hours = worklogs.reduce((sum, worklog) => {
-            return sum + worklog.hours;
-        }, 0);
+        let hours = worklogs.reduce((sum, worklog) => sum + worklog.hours, 0);
         let hoursToChoose = Array.from({length: 8 - hours + 1}, (x, i) => i).slice(1).reverse().map(n => `${n}h`);
         return inquirer
             .prompt([

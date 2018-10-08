@@ -41,13 +41,13 @@ worklog reset
 ```
 $ worklog yesterday
 ? Choose task (from 2018-10-07): (Use arrow keys)
-❯ TIC-123 - First task
-  TIC-234 - Second task
+❯ JRA-123 - First task
+  JRA-234 - Second task
   
 [ENTER]
 
 $ worklog yesterday
-? Choose task (from 2018-10-07): TIC-123 - First task
+? Choose task (from 2018-10-07): JRA-123 - First task
 ? Choose time spent: (Use arrow keys)
 ❯ 4h
   3h
@@ -57,14 +57,14 @@ $ worklog yesterday
 [ENTER]
 
 $ worklog yesterday
-? Choose task (from 2018-10-07): TIC-123 - First task
-? Choose time spent: 8h
-? Do you confirm to log 4h of work in task TIC-123? (Y/n)
+? Choose task (from 2018-10-07): JRA-123 - First task
+? Choose time spent: 4h
+? Do you confirm to log 4h of work in task JRA-123? (Y/n)
 
 [ENTER]
 
 $ worklog yesterday
-? Choose task (from 2018-10-08): JRA-123 - First task
+? Choose task (from 2018-10-07): JRA-123 - First task
 ? Choose time spent: 4h
 ? Do you confirm to log 4h of work in task JRA-123? Yes
 Successfully logged 4h of work.

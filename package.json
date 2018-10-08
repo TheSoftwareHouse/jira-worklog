@@ -16,10 +16,17 @@
   "engines": {
     "node": ">=7.6"
   },
+  "repository": "github:ppietak/jira-worklog",
   "license": "MIT",
   "scripts": {
     "start": "node index.js"
   },
+  "keywords": [
+    "cli",
+    "jira",
+    "jql",
+    "worklog"
+  ],
   "bin": {
     "worklog": "./cli.js"
   }

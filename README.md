@@ -36,7 +36,7 @@ To clear credentials and all other settings, use following command:
 worklog reset
 ```
 
-### Example
+## Example
 
 ```
 $ worklog yesterday

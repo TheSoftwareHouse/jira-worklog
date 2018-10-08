@@ -12,6 +12,9 @@
     "lodash": "^4.17.11",
     "moment": "^2.22.2"
   },
+  "engines" : {
+    "node" : ">=7.6"
+  },
   "license": "MIT",
   "scripts": {
     "start": "node index.js"

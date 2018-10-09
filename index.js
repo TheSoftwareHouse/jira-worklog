@@ -4,13 +4,11 @@ const keytar = require('keytar');
 const Conf = require('conf');
 const config = new Conf();
 
-const moment = require('moment');
-const chrono = require('chrono-node');
 const inquirer = require('inquirer');
 
-const argument = process.argv.slice(2).join(' ').trim() || 'today';
+const phrase = process.argv.slice(2).join(' ').trim();
 
-if (argument === 'reset') {
+if (phrase === 'reset') {
     if (config.get('account')) {
         keytar.deletePassword('jira-worklog', config.get('account'));
         config.clear();
@@ -21,15 +19,9 @@ if (argument === 'reset') {
 }
 
 const JiraTasks = require('./jira-tasks.js');
+const DateRecognition = require('./date-recognition.js');
 
-const day = chrono.parseDate(argument).getTime() > chrono.parseDate('now').getTime() ?
-    moment(chrono.parseDate(argument, startOfWeek())).format('YYYY-MM-DD') :
-    moment(chrono.parseDate(argument)).format('YYYY-MM-DD');
-
-function startOfWeek() {
-    const diff = new Date().getDate() - new Date().getDay() + (new Date().getDay() === 0 ? -6 : 1);
-    return new Date(new Date().setDate(diff));
-}
+const day = DateRecognition.recognize(phrase).format('YYYY-MM-DD');
 
 inquirer
     .prompt([

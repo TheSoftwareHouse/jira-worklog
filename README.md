@@ -38,7 +38,7 @@ Successfully logged 4h of work.
 ## Install
 
 ```
-npm install jira-worklog -g
+npm install @tshio/jira-worklog -g
 ```
 
 ## Usage

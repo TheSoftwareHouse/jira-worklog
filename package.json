@@ -28,5 +28,5 @@
   ],
   "bin": {
     "worklog": "bin/worklog"
-  },
+  }
 }

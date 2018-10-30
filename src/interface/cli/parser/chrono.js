@@ -1,16 +1,15 @@
 "use strict";
 
-const moment = require('moment');
 const chrono = require('chrono-node');
+const moment = require('moment');
 
 module.exports = {
-    recognize: (phrase) => {
+    parseDay: (phrase) => {
         phrase = phrase || 'today';
         const day = chrono.parseDate(phrase).getTime() > chrono.parseDate('now').getTime() ?
-            moment(chrono.parseDate(phrase, startOfWeek())).format('YYYY-MM-DD') :
-            moment(chrono.parseDate(phrase)).format('YYYY-MM-DD');
-
-        return moment(day, "YYYY-MM-DD");
+            moment(chrono.parseDate(phrase, startOfWeek())) :
+            moment(chrono.parseDate(phrase));
+        return day.format('YYYY-MM-DD');
     },
 };
 

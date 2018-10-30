@@ -29,14 +29,7 @@ module.exports = {
     worklogs: (project, day) => {
         return initialize().then(client => findWorklogs(client, project, day));
     },
-    log: (taskKey, day, spent) => {
-        return initialize().then(client => logWork(client, taskKey, day, spent));
-    },
 };
-
-function jiraDateTime(day) {
-    return new Date(day).toISOString().replace('Z', '+0000');
-}
 
 function jiraErrorDump(err) {
     JSON.parse(err).body.errorMessages.forEach(msg => console.log("ERROR: " + msg));
@@ -105,7 +98,7 @@ async function findWorklogs(client, project, day) {
             return res.issues.map(task => {
                 const spentSeconds = task.fields.worklog
                     .worklogs
-                    .filter(worklog => 
+                    .filter(worklog =>
                         worklog.author.key === userKey
                         && new Date(worklog.started) >= new Date(dayStart(day))
                         && new Date(worklog.started) <= new Date(dayEnd(day))
@@ -116,17 +109,6 @@ async function findWorklogs(client, project, day) {
                     hours: Math.floor(spentSeconds / 3600)
                 };
             })
-        })
-        .catch(jiraErrorDump)
-}
-
-function logWork(client, taskKey, day, spent) {
-    return client
-        .issue
-        .addWorkLog({
-            issueKey: taskKey,
-            notifyUsers: false,
-            worklog: {timeSpent: spent, started: jiraDateTime(day)}
         })
         .catch(jiraErrorDump)
 }

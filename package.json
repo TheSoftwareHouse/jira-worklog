@@ -18,7 +18,7 @@
   "repository": "github:TheSoftwareHouse/jira-worklog",
   "license": "MIT",
   "scripts": {
-    "start": "node index.js"
+    "start": "bin/worklog"
   },
   "keywords": [
     "cli",
@@ -27,6 +27,6 @@
     "worklog"
   ],
   "bin": {
-    "worklog": "./cli.js"
-  }
+    "worklog": "bin/worklog"
+  },
 }

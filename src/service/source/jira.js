@@ -9,7 +9,7 @@ const _ = require('lodash');
 
 const initialize = () => keytar
     .getPassword('jira-worklog', config.get('account'))
-    .then((password) => new JiraClient({
+    .then(password => new JiraClient({
         host: config.get('host'),
         basic_auth: {
             username: config.get('account'),
@@ -18,32 +18,24 @@ const initialize = () => keytar
     }));
 
 module.exports = {
-    tasks: (project, day) => {
-        return initialize()
+    tasks: (project, day) =>
+        initialize()
             .then(client => Promise.all([
                 findCommentedTasks(client, project, day),
                 findAssignedTasks(client, project, day)
             ]))
-            .then(([commented, assigned]) => _.uniqBy([...commented, ...assigned], 'key'));
-    },
-    worklogs: (project, day) => {
-        return initialize().then(client => findWorklogs(client, project, day));
-    },
+            .then(([commented, assigned]) => _.uniqBy([...commented, ...assigned], 'key')),
+    
+    worklogs: (project, day) => 
+        initialize()
+            .then(client => findWorklogs(client, project, day)),
 };
 
-function jiraErrorDump(err) {
-    JSON.parse(err).body.errorMessages.forEach(msg => console.log("ERROR: " + msg));
-}
+const jiraErrorDump = (error) => JSON.parse(error).body.errorMessages.forEach(msg => console.log("ERROR: " + msg));
+const dayStart = (day) => (day + ' 00:00');
+const dayEnd = (day) => (day + ' 23:59');
 
-function dayStart(day) {
-    return day + ' 00:00';
-}
-
-function dayEnd(day) {
-    return day + ' 23:59';
-}
-
-async function findCommentedTasks(client, project, day) {
+const findCommentedTasks = async (client, project, day) => {
     const userKey = await client.myself.getMyself().then(user => user.key);
     const jqlCommentedTasks = `project = ${project} AND status was in ("To Do", "In progress") ON ${day} ORDER BY created ASC`;
     return client
@@ -67,9 +59,9 @@ async function findCommentedTasks(client, project, day) {
                 });
         })
         .catch(jiraErrorDump)
-}
+};
 
-async function findAssignedTasks(client, project, day) {
+const findAssignedTasks = async (client, project, day) => {
     const jql = `project = ${project} AND assignee was currentUser() ON ${day} ORDER BY updated ASC`;
     return client
         .search
@@ -82,9 +74,9 @@ async function findAssignedTasks(client, project, day) {
             })
         )
         .catch(jiraErrorDump)
-}
+};
 
-async function findWorklogs(client, project, day) {
+const findWorklogs = async (client, project, day) => {
     const userKey = await client.myself.getMyself().then(user => user.key);
     const jql =
         `project = ${project} ` +
@@ -111,4 +103,4 @@ async function findWorklogs(client, project, day) {
             })
         })
         .catch(jiraErrorDump)
-}
+};

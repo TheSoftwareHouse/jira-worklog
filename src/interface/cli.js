@@ -15,7 +15,8 @@ const run = async (phrase) => {
 
     const chosenDay = Parser.parseDay(phrase);
 
-    const tasks = await Jira.getSuggestedTasks(Config.getProject(), chosenDay);
+    const taskKeys = await Jira.getSuggestedTaskKeys(Config.getProject(), chosenDay);
+    const tasks = await Jira.findTasksWithKeys(taskKeys);
     const chosenTask = await Prompter.promptTask(chosenDay, tasks.map(task => task.key + ' - ' + task.name));
 
     const worklogs = await Jira.getWorklogs(Config.getProject(), chosenDay);

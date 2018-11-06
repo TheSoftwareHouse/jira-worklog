@@ -14,13 +14,20 @@ module.exports = {
             getWorklogs: (project, day) =>
                 findWorklogs(client, project, day),
 
-            getSuggestedTasks: (project, day) =>
+            getSuggestedTaskKeys: (project, day) =>
                 Promise
                     .all([
                         findCommentedTasks(client, project, day),
                         findAssignedTasks(client, project, day)
                     ])
-                    .then(([commented, assigned]) => _.uniqBy([...commented, ...assigned], 'key')),
+                    .then(([commented, assigned]) => _.uniqBy([...commented, ...assigned], 'key'))
+                    .then(tasks => tasks.map(task => task.key)),
+
+            findTasksWithKeys: (keys) =>
+                client
+                    .search
+                    .search({jql: 'key in (' + keys.join(', ') + ')'})
+                    .then(result => result.issues.map(task => { return {key: task.key, name: task.fields.summary}})),
 
             sendWorklog: (day, task, hours) =>
                 client

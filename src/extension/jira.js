@@ -23,11 +23,16 @@ module.exports = {
                     .then(([commented, assigned]) => _.uniqBy([...commented, ...assigned], 'key'))
                     .then(tasks => tasks.map(task => task.key)),
 
-            findTasksWithKeys: (keys) =>
-                client
+            findTasksWithKeys: (keys) => {
+                if (keys.length === 0) {
+                    return [];
+                }
+                
+                return client
                     .search
                     .search({jql: 'key in (' + keys.join(', ') + ')'})
-                    .then(result => result.issues.map(task => { return {key: task.key, name: task.fields.summary}})),
+                    .then(result => result.issues.map(task => { return {key: task.key, name: task.fields.summary}}));
+            },
 
             sendWorklog: (day, task, hours) =>
                 client

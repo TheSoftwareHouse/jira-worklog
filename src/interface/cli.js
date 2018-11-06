@@ -1,9 +1,12 @@
 "use strict";
 
+const inquirer = require('inquirer');
+const _ = require('lodash');
 const Config = require('./cli/config');
 const Parser = require('./cli/parser/chrono');
 const Prompter = require('./cli/prompter/inquirer');
 const JiraExtension = require('../extension/jira');
+const GitExtension = require('../extension/git');
 
 const run = async (phrase) => {
     while (!Config.hasProject()) await Prompter.promptProject().then(project => Config.setProject(project));
@@ -15,10 +18,26 @@ const run = async (phrase) => {
 
     const chosenDay = Parser.parseDay(phrase);
 
-    const taskKeys = await Jira.getSuggestedTaskKeys(Config.getProject(), chosenDay);
-    const tasks = await Jira.findTasksWithKeys(taskKeys);
-    const chosenTask = await Prompter.promptTask(chosenDay, tasks.map(task => task.key + ' - ' + task.name));
-
+    const gitTasks = await Promise.resolve(GitExtension.getSuggestedTaskKeys(Config.getProject(), chosenDay))
+        .then(Jira.findTasksWithKeys)
+        .then(tasks => tasks.map(task => task.key + ' - ' + task.name));
+    
+    const jiraTasks = await Jira.getSuggestedTaskKeys(Config.getProject(), chosenDay)
+        .then(Jira.findTasksWithKeys)
+        .then(tasks => tasks.map(task => task.key + ' - ' + task.name));
+    
+    if ([...gitTasks, ...jiraTasks].length === 0) {
+        console.log('Could not found any tasks for given day.');
+        return;
+    }
+    
+    const chosenTask = await Prompter.promptTask(chosenDay, [
+        new inquirer.Separator('Git'),
+        ...gitTasks,
+        new inquirer.Separator('Jira'),
+        ...jiraTasks,
+    ]);
+    
     const worklogs = await Jira.getWorklogs(Config.getProject(), chosenDay);
     const hoursAlready = worklogs.reduce((sum, worklog) => sum + worklog.hours, 0);
     const hours = Array.from({length: Config.getHoursPerDay()}, (x, i) => i + 1).reverse();

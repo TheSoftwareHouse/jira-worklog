@@ -3,7 +3,6 @@
 const Config = require('./cli/config');
 const Parser = require('./cli/parser/chrono');
 const Prompter = require('./cli/prompter/inquirer');
-
 const JiraExtension = require('../extension/jira');
 
 const run = async (phrase) => {
@@ -14,16 +13,15 @@ const run = async (phrase) => {
     
     const Jira = JiraExtension.initialize(Config.getHost(), Config.getAccount(), await Config.getPassword());
 
-    const project = Config.getProject();
     const chosenDay = Parser.parseDay(phrase);
 
-    const tasks = await Jira.getSuggestedTasks(project, chosenDay);
+    const tasks = await Jira.getSuggestedTasks(Config.getProject(), chosenDay);
     const chosenTask = await Prompter.promptTask(chosenDay, tasks.map(task => task.key + ' - ' + task.name));
 
-    const worklogs = await Jira.getWorklogs(project, chosenDay);
-    const hoursLogged = worklogs.reduce((sum, worklog) => sum + worklog.hours, 0);
-    const hours = Array.from({length: 8}, (x, i) => i + 1).reverse();
-    const chosenHours = await Prompter.promptHours(hours.map(n => `${n}h`), hoursLogged);
+    const worklogs = await Jira.getWorklogs(Config.getProject(), chosenDay);
+    const hoursAlready = worklogs.reduce((sum, worklog) => sum + worklog.hours, 0);
+    const hours = Array.from({length: Config.getHoursPerDay()}, (x, i) => i + 1).reverse();
+    const chosenHours = await Prompter.promptHours(hours.map(n => `${n}h`), Config.getHoursPerDay() - hoursAlready);
 
     const confirmed = await Prompter.promptConfirmation(chosenHours, chosenTask);
     if (confirmed) {

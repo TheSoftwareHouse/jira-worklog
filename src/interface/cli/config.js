@@ -5,6 +5,7 @@ const store = new Conf();
 const storeSafe = require('keytar');
 
 const SERVICE = 'jira-worklog';
+const HOURS_PER_DAY = 8;
 
 const setProject = (project) => store.set('project', project);
 const getProject = () => store.get('project') || '';
@@ -54,5 +55,6 @@ module.exports = {
     getPassword: getPassword,
     setPassword: setPassword,
     hasPassword: hasPassword,
+    getHoursPerDay: () => HOURS_PER_DAY,
     clear: clear,
 };

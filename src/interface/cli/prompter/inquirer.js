@@ -50,7 +50,7 @@ module.exports = {
             })
             .then(({task}) => task),
 
-    promptHours: async (choices) =>
+    promptHours: async (choices, defaultChoice) =>
         inquirer
             .prompt({
                 type: 'list',
@@ -58,6 +58,7 @@ module.exports = {
                 message: 'Choose time spent:',
                 choices: choices,
                 filter: time => time.match(/\d+/)[0],
+                default: defaultChoice,
             })
             .then(({hours}) => hours),
 

@@ -22,8 +22,8 @@ const run = async (phrase) => {
 
     const worklogs = await Jira.getWorklogs(project, chosenDay);
     const hoursLogged = worklogs.reduce((sum, worklog) => sum + worklog.hours, 0);
-    const hours = Array.from({length: 8 - hoursLogged + 1}, (x, i) => i).slice(1).reverse();
-    const chosenHours = await Prompter.promptHours(hours.map(n => `${n}h`));
+    const hours = Array.from({length: 8}, (x, i) => i + 1).reverse();
+    const chosenHours = await Prompter.promptHours(hours.map(n => `${n}h`), hoursLogged);
 
     const confirmed = await Prompter.promptConfirmation(chosenHours, chosenTask);
     if (confirmed) {
@@ -41,5 +41,5 @@ switch (phrase) {
         Config.clear().then(() => console.log('All cleared.'));
         break;
     default:
-        run(phrase).catch(console.log);
+        run(phrase).catch(() => console.log('An error occured. Please try again or contact the author. Sorry!'));
 }

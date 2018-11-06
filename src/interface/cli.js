@@ -2,9 +2,12 @@
 
 const inquirer = require('inquirer');
 const _ = require('lodash');
+
 const Config = require('./cli/config');
 const Parser = require('./cli/parser/chrono');
 const Prompter = require('./cli/prompter/inquirer');
+
+//fixme use "source/suggestions" modules for getting task keys
 const JiraExtension = require('../extension/jira');
 const GitExtension = require('../extension/git');
 
@@ -19,18 +22,20 @@ const run = async (phrase) => {
     const chosenDay = Parser.parseDay(phrase);
 
     const gitTasks = await Promise.resolve(GitExtension.getSuggestedTaskKeys(Config.getProject(), chosenDay))
-        .then(Jira.findTasksWithKeys)
+        .then(Jira.findTasksWithKeys) //fixme needs one-time fetching optimization
         .then(tasks => tasks.map(task => task.key + ' - ' + task.name));
     
     const jiraTasks = await Jira.getSuggestedTaskKeys(Config.getProject(), chosenDay)
-        .then(Jira.findTasksWithKeys)
+        .then(Jira.findTasksWithKeys) //fixme needs one-time fetching optimization
         .then(tasks => tasks.map(task => task.key + ' - ' + task.name));
     
     if ([...gitTasks, ...jiraTasks].length === 0) {
+        //fixme use different output/logging
         console.log('Could not found any tasks for given day.');
         return;
     }
     
+    //fixme handling separators is a responsibility of prompter
     const chosenTask = await Prompter.promptTask(chosenDay, [
         new inquirer.Separator('Git'),
         ...gitTasks,

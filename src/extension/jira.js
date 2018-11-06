@@ -1,37 +1,40 @@
 "use strict";
 
-const keytar = require('keytar');
-const Conf = require('conf');
-const config = new Conf();
-
 const JiraClient = require('jira-connector');
 const _ = require('lodash');
 
-const initialize = () => keytar
-    .getPassword('jira-worklog', config.get('account'))
-    .then(password => new JiraClient({
-        host: config.get('host'),
-        basic_auth: {
-            username: config.get('account'),
-            password: password
-        }
-    }));
-
 module.exports = {
-    tasks: (project, day) =>
-        initialize()
-            .then(client => Promise.all([
-                findCommentedTasks(client, project, day),
-                findAssignedTasks(client, project, day)
-            ]))
-            .then(([commented, assigned]) => _.uniqBy([...commented, ...assigned], 'key')),
-    
-    worklogs: (project, day) => 
-        initialize()
-            .then(client => findWorklogs(client, project, day)),
+    initialize: (host, account, password) => {
+        const client = new JiraClient({
+            host: host,
+            basic_auth: {username: account, password: password}
+        });
+
+        return {
+            getWorklogs: (project, day) =>
+                findWorklogs(client, project, day),
+
+            getSuggestedTasks: (project, day) =>
+                Promise
+                    .all([
+                        findCommentedTasks(client, project, day),
+                        findAssignedTasks(client, project, day)
+                    ])
+                    .then(([commented, assigned]) => _.uniqBy([...commented, ...assigned], 'key')),
+
+            sendWorklog: (day, task, hours) =>
+                client
+                    .issue
+                    .addWorkLog({
+                        issueKey: task,
+                        notifyUsers: false,
+                        worklog: {timeSpent: hours, started: jiraDateTime(day)}
+                    }),
+        };
+    }
 };
 
-const jiraErrorDump = (error) => JSON.parse(error).body.errorMessages.forEach(msg => console.log("ERROR: " + msg));
+const jiraDateTime = (day) => new Date(day).toISOString().replace('Z', '+0000');
 const dayStart = (day) => (day + ' 00:00');
 const dayEnd = (day) => (day + ' 23:59');
 
@@ -57,8 +60,7 @@ const findCommentedTasks = async (client, project, day) => {
                         name: task.fields.summary,
                     };
                 });
-        })
-        .catch(jiraErrorDump)
+        });
 };
 
 const findAssignedTasks = async (client, project, day) => {
@@ -72,8 +74,7 @@ const findAssignedTasks = async (client, project, day) => {
                     name: task.fields.summary
                 };
             })
-        )
-        .catch(jiraErrorDump)
+        );
 };
 
 const findWorklogs = async (client, project, day) => {
@@ -101,6 +102,5 @@ const findWorklogs = async (client, project, day) => {
                     hours: Math.floor(spentSeconds / 3600)
                 };
             })
-        })
-        .catch(jiraErrorDump)
+        });
 };

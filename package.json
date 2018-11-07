@@ -11,7 +11,8 @@
     "jira-connector": "2.8.0",
     "keytar": "^4.3.0",
     "lodash": "^4.17.11",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "winston": "^3.1.0"
   },
   "engines": {
     "node": ">=7.6"

@@ -3,7 +3,7 @@
 const inquirer = require('inquirer');
 
 module.exports = {
-    promptProject: () =>
+    askForProject: () =>
         inquirer
             .prompt([{
                 name: 'project',
@@ -12,7 +12,7 @@ module.exports = {
             }])
             .then(({project}) => project),
 
-    promptHost: () =>
+    askForHost: () =>
         inquirer
             .prompt([{
                 name: 'host',
@@ -21,7 +21,7 @@ module.exports = {
             }])
             .then(({host}) => host),
 
-    promptAccount: () =>
+    askForAccount: () =>
         inquirer
             .prompt([{
                 name: 'account',
@@ -30,7 +30,7 @@ module.exports = {
             }])
             .then(({account}) => account),
 
-    promptPassword: async () =>
+    askForPassword: async () =>
         inquirer
             .prompt([{
                 name: 'password',

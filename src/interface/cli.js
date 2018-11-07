@@ -1,25 +1,24 @@
 "use strict";
 
-const inquirer = require('inquirer');
-const _ = require('lodash');
-
 const Config = require('./cli/config');
-const Parser = require('./cli/parser/chrono');
-const Prompter = require('./cli/prompter/inquirer');
+
+const parser = require('./cli/input/parser');
+const prompts = require('./cli/input/prompter');
+const logger = require('./cli/output/logger');
 
 //fixme use "source/suggestions" modules for getting task keys
 const JiraExtension = require('../extension/jira');
 const GitExtension = require('../extension/git');
 
 const run = async (phrase) => {
-    while (!Config.hasProject()) await Prompter.promptProject().then(project => Config.setProject(project));
-    while (!Config.hasHost()) await Prompter.promptHost().then(host => Config.setHost(host));
-    while (!Config.hasAccount()) await Prompter.promptAccount().then(account => Config.setAccount(account));
-    while (!(await Config.hasPassword())) await Prompter.promptPassword().then(password => Config.setPassword(password));
+    while (!Config.hasProject()) await prompts.askForProject().then(project => Config.setProject(project));
+    while (!Config.hasHost()) await prompts.askForHost().then(host => Config.setHost(host));
+    while (!Config.hasAccount()) await prompts.askForAccount().then(account => Config.setAccount(account));
+    while (!(await Config.hasPassword())) await prompts.askForPassword().then(password => Config.setPassword(password));
     
     const Jira = JiraExtension.initialize(Config.getHost(), Config.getAccount(), await Config.getPassword());
 
-    const chosenDay = Parser.parseDay(phrase);
+    const chosenDay = parser.parseDay(phrase);
     
     const tasks = await Promise
         .all([
@@ -42,22 +41,21 @@ const run = async (phrase) => {
         .getWorklogs(Config.getProject(), chosenDay)
         .then(worklogs => worklogs.reduce((sum, worklog) => sum + worklog.hours, 0));
     
-    const chosenTask = await Prompter.promptTask(chosenDay, tasks);
+    const chosenTask = await prompts.promptTask(chosenDay, tasks);
     if (chosenTask === null) {
-        //fixme use different output/logging
-        console.log('Could not find any task to choose from.');
+        logger.error('Could not find any task to choose from.');
         return;
     }
     
     const hours = Array.from({length: Config.getHoursPerDay()}, (x, i) => i + 1).reverse();
-    const chosenHours = await Prompter.promptHours(hours.map(n => `${n}h`), await hoursAlready || Config.getHoursPerDay());
+    const chosenHours = await prompts.promptHours(hours.map(n => `${n}h`), await hoursAlready || Config.getHoursPerDay());
 
-    const confirmed = await Prompter.promptConfirmation(chosenHours, chosenTask);
+    const confirmed = await prompts.promptConfirmation(chosenHours, chosenTask);
     if (confirmed) {
         await Jira.sendWorklog(chosenDay, chosenTask, chosenHours);
-        console.log(`Successfully logged ${chosenHours}h of work.`);
+        logger.info(`Successfully logged ${chosenHours}h of work.`);
     } else {
-        console.log('Ok, aborted.');
+        logger.info('Ok, aborted.');
     }
 };
 
@@ -65,8 +63,8 @@ const phrase = process.argv.slice(2).join(' ').trim();
 
 switch (phrase) {
     case 'reset':
-        Config.clear().then(() => console.log('All cleared.'));
+        Config.clear().then(() => logger.info('All cleared.'));
         break;
     default:
-        run(phrase).catch(() => console.log('An error occured. Please try again or contact the author. Sorry!'));
+        run(phrase).catch(() => logger.error('An error occured. Please try again or contact the author. Sorry!'));
 }

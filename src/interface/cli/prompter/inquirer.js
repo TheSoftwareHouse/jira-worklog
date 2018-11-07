@@ -39,8 +39,20 @@ module.exports = {
             }])
             .then(({password}) => password),
 
-    promptTask: async (day, choices) =>
-        inquirer
+    promptTask: async (day, choices) => {
+        if (!Array.isArray(choices)) {
+            choices = Object
+                .keys(choices)
+                .filter(source => (choices[source] || []).length > 0)
+                .map(source => [new inquirer.Separator(source), ...choices[source]])
+                .reduce((acc, val) => acc.concat(val), []);
+        }
+        
+        if (choices.length === 0) {
+            return Promise.resolve(null);
+        }
+        
+        return inquirer
             .prompt({
                 type: 'list',
                 name: 'task',
@@ -48,7 +60,8 @@ module.exports = {
                 choices: choices,
                 filter: task => task.match(/^\w+\-\d+/)[0],
             })
-            .then(({task}) => task),
+            .then(({task}) => task);
+    },
 
     promptHours: async (choices, defaultChoice) =>
         inquirer

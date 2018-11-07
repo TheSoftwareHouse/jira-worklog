@@ -40,7 +40,7 @@ module.exports = {
                     .addWorkLog({
                         issueKey: task,
                         notifyUsers: false,
-                        worklog: {timeSpent: hours, started: jiraDateTime(day)}
+                        worklog: {timeSpent: `${hours}h`, started: jiraDateTime(day)}
                     }),
         };
     }

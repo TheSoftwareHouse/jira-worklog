@@ -20,40 +20,44 @@ const run = async (phrase) => {
     const Jira = JiraExtension.initialize(Config.getHost(), Config.getAccount(), await Config.getPassword());
 
     const chosenDay = Parser.parseDay(phrase);
+    
+    const tasks = await Promise
+        .all([
+            GitExtension.getSuggestedTaskKeys(Config.getProject(), chosenDay),
+            Jira.getSuggestedTaskKeys(Config.getProject(), chosenDay),
+        ])
+        .then(([gitKeys, jiraKeys]) => {
+            const allKeys = [...gitKeys, ...jiraKeys];
+            return Jira.findTasksWithKeys(allKeys).then(tasks => ({
+                'Git': tasks
+                    .filter(task => gitKeys.indexOf(task.key) !== -1)
+                    .map(task => task.key + ' - ' + task.name),
+                'Jira': tasks
+                    .filter(task => jiraKeys.indexOf(task.key) !== -1)
+                    .map(task => task.key + ' - ' + task.name)
+            }))
+        });
 
-    const gitTasks = await Promise.resolve(GitExtension.getSuggestedTaskKeys(Config.getProject(), chosenDay))
-        .then(Jira.findTasksWithKeys) //fixme needs one-time fetching optimization
-        .then(tasks => tasks.map(task => task.key + ' - ' + task.name));
+    const hoursAlready = Jira
+        .getWorklogs(Config.getProject(), chosenDay)
+        .then(worklogs => worklogs.reduce((sum, worklog) => sum + worklog.hours, 0));
     
-    const jiraTasks = await Jira.getSuggestedTaskKeys(Config.getProject(), chosenDay)
-        .then(Jira.findTasksWithKeys) //fixme needs one-time fetching optimization
-        .then(tasks => tasks.map(task => task.key + ' - ' + task.name));
-    
-    if ([...gitTasks, ...jiraTasks].length === 0) {
+    const chosenTask = await Prompter.promptTask(chosenDay, tasks);
+    if (chosenTask === null) {
         //fixme use different output/logging
-        console.log('Could not found any tasks for given day.');
+        console.log('Could not find any task to choose from.');
         return;
     }
     
-    //fixme handling separators is a responsibility of prompter
-    const chosenTask = await Prompter.promptTask(chosenDay, [
-        new inquirer.Separator('Git'),
-        ...gitTasks,
-        new inquirer.Separator('Jira'),
-        ...jiraTasks,
-    ]);
-    
-    const worklogs = await Jira.getWorklogs(Config.getProject(), chosenDay);
-    const hoursAlready = worklogs.reduce((sum, worklog) => sum + worklog.hours, 0);
     const hours = Array.from({length: Config.getHoursPerDay()}, (x, i) => i + 1).reverse();
-    const chosenHours = await Prompter.promptHours(hours.map(n => `${n}h`), Config.getHoursPerDay() - hoursAlready);
+    const chosenHours = await Prompter.promptHours(hours.map(n => `${n}h`), await hoursAlready || Config.getHoursPerDay());
 
     const confirmed = await Prompter.promptConfirmation(chosenHours, chosenTask);
     if (confirmed) {
         await Jira.sendWorklog(chosenDay, chosenTask, chosenHours);
         console.log(`Successfully logged ${chosenHours}h of work.`);
     } else {
-        console.log('Aborted.');
+        console.log('Ok, aborted.');
     }
 };
 

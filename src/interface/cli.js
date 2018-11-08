@@ -3,7 +3,7 @@
 const Config = require('./cli/config');
 
 const parser = require('./cli/input/parser');
-const prompts = require('./cli/input/prompter');
+const prompts = require('./cli/input/prompts');
 const logger = require('./cli/output/logger');
 
 //fixme use "source/suggestions" modules for getting task keys

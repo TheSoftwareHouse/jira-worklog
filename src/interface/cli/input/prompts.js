@@ -1,6 +1,11 @@
 "use strict";
 
+const moment = require('moment');
 const inquirer = require('inquirer');
+const chalk = require('chalk');
+const staticSelectPrompt = require('../../../lib/inquirer/staticSelectPrompt');
+
+inquirer.registerPrompt('static-select', staticSelectPrompt);
 
 module.exports = {
     askForProject: () =>
@@ -38,6 +43,19 @@ module.exports = {
                 message: 'Jira password',
             }])
             .then(({password}) => password),
+
+    promptDay: async () =>
+        inquirer
+            .prompt({
+                type: 'static-select',
+                name: 'date',
+                message: 'Choose date (use arrows):',
+                choices: Array
+                    .from({length: 31}, (x, i) => i)
+                    .map(x => moment().subtract(x, 'days'))
+                    .map(date => ({name: chalk.cyan(date.format('YYYY-MM-DD')) + chalk.dim(date.format(' (dddd)')), value: date.format('YYYY-MM-DD')})),
+            })
+            .then(({date}) => date),
 
     promptTask: async (day, choices) => {
         if (!Array.isArray(choices)) {

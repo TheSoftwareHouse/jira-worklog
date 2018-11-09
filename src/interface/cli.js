@@ -2,7 +2,6 @@
 
 const Config = require('./cli/config');
 
-const parser = require('./cli/input/parser');
 const prompts = require('./cli/input/prompts');
 const logger = require('./cli/output/logger');
 
@@ -10,7 +9,7 @@ const logger = require('./cli/output/logger');
 const JiraExtension = require('../extension/jira');
 const GitExtension = require('../extension/git');
 
-const run = async (phrase) => {
+const run = async () => {
     while (!Config.hasProject()) await prompts.askForProject().then(project => Config.setProject(project));
     while (!Config.hasHost()) await prompts.askForHost().then(host => Config.setHost(host));
     while (!Config.hasAccount()) await prompts.askForAccount().then(account => Config.setAccount(account));
@@ -18,7 +17,7 @@ const run = async (phrase) => {
     
     const Jira = JiraExtension.initialize(Config.getHost(), Config.getAccount(), await Config.getPassword());
 
-    const chosenDay = parser.parseDay(phrase);
+    const chosenDay = await prompts.promptDay();
     
     const tasks = await Promise
         .all([
@@ -66,5 +65,5 @@ switch (phrase) {
         Config.clear().then(() => logger.info('All cleared.'));
         break;
     default:
-        run(phrase).catch(() => logger.error('An error occured. Please try again or contact the author. Sorry!'));
+        run()//.catch(() => logger.error('An error occured. Please try again or contact the author. Sorry!'));
 }

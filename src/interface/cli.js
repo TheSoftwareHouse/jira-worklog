@@ -65,5 +65,5 @@ switch (phrase) {
         Config.clear().then(() => logger.info('All cleared.'));
         break;
     default:
-        run()//.catch(() => logger.error('An error occured. Please try again or contact the author. Sorry!'));
+        run().catch(() => logger.error('An error occured. Please try again or contact the author. Sorry!'));
 }

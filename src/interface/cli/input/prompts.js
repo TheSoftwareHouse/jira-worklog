@@ -74,7 +74,7 @@ module.exports = {
             .prompt({
                 type: 'list',
                 name: 'task',
-                message: `Choose task (from ${day}):`,
+                message: `Choose task:`,
                 choices: choices,
                 filter: task => task.match(/^\w+\-\d+/)[0],
             })

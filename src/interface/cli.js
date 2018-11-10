@@ -61,7 +61,7 @@ const run = async () => {
 const phrase = process.argv.slice(2).join(' ').trim();
 
 switch (phrase) {
-    case 'reset':
+    case '--reset':
         Config.clear().then(() => logger.info('All cleared.'));
         break;
     default:

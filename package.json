@@ -1,16 +1,19 @@
 {
   "name": "@tshio/jira-worklog",
   "description": "Simple CLI tool for logging work in Jira",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "main": "index.js",
   "dependencies": {
+    "chalk": "^2.4.1",
+    "child_process": "^1.0.2",
     "chrono-node": "^1.3.5",
     "conf": "^2.0.0",
     "inquirer": "^6.2.0",
     "jira-connector": "2.8.0",
     "keytar": "^4.3.0",
     "lodash": "^4.17.11",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "winston": "^3.1.0"
   },
   "engines": {
     "node": ">=7.6"
@@ -18,7 +21,8 @@
   "repository": "github:TheSoftwareHouse/jira-worklog",
   "license": "MIT",
   "scripts": {
-    "start": "node index.js"
+    "start": "bin/worklog",
+    "test": "jest tests/*"
   },
   "keywords": [
     "cli",
@@ -27,6 +31,9 @@
     "worklog"
   ],
   "bin": {
-    "worklog": "./cli.js"
+    "worklog": "bin/worklog"
+  },
+  "devDependencies": {
+    "jest": "^23.6.0"
   }
 }

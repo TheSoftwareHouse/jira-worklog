@@ -10,10 +10,24 @@ const JiraExtension = require('../extension/jira');
 const GitExtension = require('../extension/git');
 
 const run = async () => {
-    while (!Config.hasProject()) await prompts.askForProject().then(project => Config.setProject(project));
-    while (!Config.hasHost()) await prompts.askForHost().then(host => Config.setHost(host));
-    while (!Config.hasAccount()) await prompts.askForAccount().then(account => Config.setAccount(account));
-    while (!(await Config.hasPassword())) await prompts.askForPassword().then(password => Config.setPassword(password));
+    while (!(await JiraExtension.checkCredentials(Config.getHost(), Config.getAccount(), await Config.getPassword()))) {
+        if (Config.hasHost()) {
+            await Config.clear().then(() => logger.error('Credentials are invalid. Please try again.'));
+        }
+        while (!Config.hasHost()) {
+            await prompts.askForHost().then(host => Config.setHost(host));
+        }
+        while (!Config.hasAccount()) {
+            await prompts.askForAccount().then(account => Config.setAccount(account));
+        }
+        while (!(await Config.hasPassword())) {
+            await prompts.askForPassword().then(password => Config.setPassword(password));
+        }
+    }
+
+    while (!Config.hasProject()) {
+        await prompts.askForProject().then(project => Config.setProject(project));
+    }
     
     const Jira = JiraExtension.initialize(Config.getHost(), Config.getAccount(), await Config.getPassword());
 

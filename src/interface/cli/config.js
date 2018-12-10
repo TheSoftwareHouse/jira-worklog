@@ -8,14 +8,14 @@ const SERVICE = 'jira-worklog';
 const HOURS_PER_DAY = 8;
 
 const setProject = (project) => store.set('project', project);
-const getProject = () => store.get('project') || '';
+const getProject = () => store.get('project', '') || '';
 const hasProject = () => getProject().length > 0;
 
-const getHost = () => store.get('host') || '';
+const getHost = () => store.get('host', '') || '';
 const setHost = (host) => store.set('host', host);
 const hasHost = () => getHost().length > 0;
 
-const getAccount = () => store.get('account') || '';
+const getAccount = () => store.get('account', '') || '';
 const setAccount = (account) => store.set('account', account);
 const hasAccount = () => getAccount().length > 0;
 

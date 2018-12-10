@@ -3,6 +3,18 @@
 const JiraClient = require('jira-connector');
 
 module.exports = {
+    checkCredentials: async (host, account, password) => {
+        try {
+            const client = new JiraClient({
+                host: host,
+                basic_auth: {username: account, password: password}
+            });
+            return await client.myself.getMyself().then(() => true).catch(() => false);    
+        } catch (err) {
+            return false;
+        }
+    },
+    
     initialize: (host, account, password) => {
         const username = account;
         const client = new JiraClient({

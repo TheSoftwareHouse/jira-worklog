@@ -1,7 +1,7 @@
 {
   "name": "@tshio/jira-worklog",
   "description": "Simple CLI tool for logging work in Jira",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "main": "index.js",
   "dependencies": {
     "chalk": "^2.4.1",
